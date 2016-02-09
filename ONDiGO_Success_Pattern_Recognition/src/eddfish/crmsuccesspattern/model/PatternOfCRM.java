@@ -2,14 +2,14 @@ package eddfish.crmsuccesspattern.model;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math3.util.FastMath;
 
-import eddfish.crmsuccesspattern.dao.*;
+import eddfish.crmsuccesspattern.dao.EVandSD;
+import eddfish.crmsuccesspattern.dao.ONDiGO;
+import eddfish.crmsuccesspattern.dao.Stages;
 
 public class PatternOfCRM {
 	SimpleDateFormat df;
@@ -17,16 +17,26 @@ public class PatternOfCRM {
 	private int nOfWons;
 	EVandSD lifeTimeEVandSD;
 	EVandSD nCommunicationsEVanSD;
+	double[] modeOfLifeTime;
+	double[] modenCommunications;
 
-	public PatternOfCRM(ONDiGO[] crm, String df, long period) throws Exception {
+	public PatternOfCRM(ONDiGO[] crm, String df, long period) throws ParseException  {
 		nOfWons = stateCounting(crm, "won");
 		this.df = new SimpleDateFormat(df);
 		this.mlSecByPeriod = period;
-		// this.lifeTimeEVandSD =
-		// calcEVandSD(listToArray(creatlistOfLifeTime(crm, "won")));
 		this.lifeTimeEVandSD = calcEVandSD(creatArrayOfLifeTime(crm, "won"));
+		this.modeOfLifeTime=StatUtils.mode(creatArrayOfLifeTime(crm, "won"));
 		this.nCommunicationsEVanSD = calcEVandSD(creatArrayOfCommunications(crm, "won"));
+		this.modenCommunications = StatUtils.mode(creatArrayOfCommunications(crm, "won"));
 
+	}
+
+	public double[] getModenCommunications() {
+		return modenCommunications;
+	}
+
+	public double[] getModeOfLifeTime() {
+		return modeOfLifeTime;
 	}
 
 	public EVandSD getLifeTimeEVandSD() {
@@ -45,40 +55,30 @@ public class PatternOfCRM {
 
 	}
 
-	private double[] listToArray(List<Integer> list) {
-		double[] res = new double[list.size()];
-		int i = 0;
-		for (Integer arg : list) {
-			res[i] = arg;
-			i++;
-		}
-		return res;
-
-	}
-
 	private double[] creatArrayOfCommunications(ONDiGO[] crm, String state) {
 		double[] res = new double[nOfWons];
 		int k = 0;
 		for (int i = 0; i < crm.length; i++) {
 			if ((crm[i].getState()).equalsIgnoreCase(state)) {
-				res[k] = crm[i].getAttachments().length + crm[i].getMeetings().length + crm[i].getMessages().length;
+				res[k] = crm[i].getMeetings().length + crm[i].getMessages().length;
 				k++;
 			}
 		}
 		return res;
 	}
 
-	private double[] creatArrayOfLifeTime(ONDiGO[] crm, String state) throws Exception {
+	private double[] creatArrayOfLifeTime(ONDiGO[] crm, String state) throws ParseException {
 		double[] res = new double[nOfWons];
 		int k = 0;
 		for (int i = 0; i < crm.length; i++) {
-			if ((crm[i].getState()).equalsIgnoreCase(state)) {
-				Stages[] tmpStage = crm[i].getStages();
+			Stages[] tmpStage = crm[i].getStages();
+			if ((crm[i].getState()).equalsIgnoreCase(state) && tmpStage.length != 0) {
 				long min = getDateByString(tmpStage[0].getDate());
 				long max = min;
 				for (int j = 1; j < tmpStage.length; j++) {
-					max = FastMath.max(max, getDateByString(tmpStage[j].getDate()));
-					min = FastMath.min(min, getDateByString(tmpStage[j].getDate()));
+					long currentDate=getDateByString(tmpStage[j].getDate());
+					max = FastMath.max(max, currentDate);
+					min = FastMath.min(min, currentDate);
 				}
 				res[k] = (getTimeInterval(min, max));
 				k++;
@@ -87,25 +87,8 @@ public class PatternOfCRM {
 		return res;
 	}
 
-	private List<Integer> creatlistOfLifeTime(ONDiGO[] crm, String state) throws Exception {
-		List<Integer> res = new LinkedList<Integer>();
-		for (int i = 0; i < crm.length; i++) {
-			if ((crm[i].getState()).equalsIgnoreCase(state)) {
-				Stages[] tmpStage = crm[i].getStages();
-				long min = getDateByString(tmpStage[0].getDate());
-				long max = min;
-				for (int j = 1; j < tmpStage.length; j++) {
-					max = FastMath.max(max, getDateByString(tmpStage[j].getDate()));
-					min = FastMath.min(min, getDateByString(tmpStage[j].getDate()));
-				}
-				res.add(getTimeInterval(min, max));
-			}
-		}
-		return res;
-	}
-
-	private int getTimeInterval(long begin, long end) throws ParseException {
-		return (int) ((end - begin) / mlSecByPeriod);
+	private double getTimeInterval(long begin, long end) {
+		return ((double)(end - begin)) / mlSecByPeriod;
 	}
 
 	private long getDateByString(String date) throws ParseException {

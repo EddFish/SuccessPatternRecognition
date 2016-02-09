@@ -18,7 +18,7 @@ public class SuccessPatternAppl {
 		 * rest.getForObject("", ONDiGO[].class);
 		 */
 		ObjectMapper mapper = new ObjectMapper();
-		ONDiGO[] crm = mapper.readValue(new File("crm.json"), ONDiGO[].class);
+		ONDiGO[] crm = mapper.readValue(new File("opportunities.json"), ONDiGO[].class);
 		/*
 		 * for (int i = 0; i < crm.length; i++) { Stages[] stg =
 		 * crm[i].getStages(); for (int j = 0; j < stg.length; j++) {
@@ -26,9 +26,17 @@ public class SuccessPatternAppl {
 		 * System.out.println(stg[j].getDate()); } }
 		 */
 		try {
-			PatternOfCRM pattern = new PatternOfCRM(crm, "yyy/MM/dd", 86400000);
+			PatternOfCRM pattern = new PatternOfCRM(crm, "yyyy-MM-dd'T'HH:mm:ss+hh:mm", 86400000);
 			System.out.println("Life Time: "+pattern.getLifeTimeEVandSD());
+			double[] modeLT=pattern.getModeOfLifeTime();
+			for (int i = 0; i < modeLT.length; i++) {
+				System.out.println(modeLT[i]);
+			}
 			System.out.println("Number of Communications: "+pattern.getnCommunicationsEVanSD());
+			double[] modeNC=pattern.getModenCommunications();
+			for (int i = 0; i < modeNC.length; i++) {
+				System.out.println(modeNC[i]);
+			}
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
