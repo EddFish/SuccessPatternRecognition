@@ -24,10 +24,13 @@ public class PatternOfCRM {
 		nOfWons = stateCounting(crm, "won");
 		this.df = new SimpleDateFormat(df);
 		this.mlSecByPeriod = period;
-		this.lifeTimeEVandSD = calcEVandSD(creatArrayOfLifeTime(crm, "won"));
-		this.modeOfLifeTime=StatUtils.mode(creatArrayOfLifeTime(crm, "won"));
-		this.nCommunicationsEVanSD = calcEVandSD(creatArrayOfCommunications(crm, "won"));
-		this.modenCommunications = StatUtils.mode(creatArrayOfCommunications(crm, "won"));
+		double[] ltArray=creatArrayOfLifeTime(crm, "won");
+		double[] ncArray=creatArrayOfCommunications(crm, "won");
+		this.modeOfLifeTime=StatUtils.mode(ltArray);
+		this.modenCommunications = StatUtils.mode(ncArray);
+		this.lifeTimeEVandSD = calcEVandSD(ltArray,modeOfLifeTime.length);
+		this.nCommunicationsEVanSD = calcEVandSD(ncArray,modenCommunications.length);
+		
 
 	}
 
@@ -47,10 +50,18 @@ public class PatternOfCRM {
 		return nCommunicationsEVanSD;
 	}
 
-	private EVandSD calcEVandSD(double[] arr) {
-		double ev = StatUtils.mean(arr);
-		StandardDeviation objSD = new StandardDeviation();
-		double sd = objSD.evaluate(arr, ev);
+	private EVandSD calcEVandSD(double[] arr, int modeLength) {
+		double ev, sd;
+		if(modeLength==1 && arr.length>30){
+			ev = StatUtils.mean(arr);
+			StandardDeviation objSD = new StandardDeviation();
+			sd = objSD.evaluate(arr, ev);
+		}
+		else {
+			ev = StatUtils.percentile(arr, 50);
+			sd = (StatUtils.percentile(arr, 75)-StatUtils.percentile(arr, 25))/2;
+		}
+		
 		return new EVandSD(ev, sd);
 
 	}
