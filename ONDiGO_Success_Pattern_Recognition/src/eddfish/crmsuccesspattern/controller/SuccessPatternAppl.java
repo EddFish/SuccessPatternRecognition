@@ -6,26 +6,28 @@ import java.io.IOException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 import org.springframework.web.client.RestTemplate;
 
+import eddfish.crmsuccesspattern.dao.InitialData;
 import eddfish.crmsuccesspattern.dao.ONDiGO;
 import eddfish.crmsuccesspattern.model.PatternOfCRM;
 
 public class SuccessPatternAppl {
 
 	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException {
+		AbstractApplicationContext ctx = new FileSystemXmlApplicationContext("settings.xml");
+		InitialData data = (InitialData) ctx.getBean("initialdata");
 
-		/*
-		 * RestTemplate rest = new RestTemplate(); ONDiGO[] crm =
-		 * rest.getForObject("http://localhost:63342/Hello/crm.html",
-		 * ONDiGO[].class);
-		 */
+		// RestTemplate rest = new RestTemplate();
+		// ONDiGO[] crm = rest.getForObject(data.getJsonURL(), ONDiGO[].class);
 
 		ObjectMapper mapper = new ObjectMapper();
-		ONDiGO[] crm = mapper.readValue(new File("opportunities.json"), ONDiGO[].class);
+		ONDiGO[] crm = mapper.readValue(new File(data.getJsonURL()), ONDiGO[].class);
 
 		try {
-			PatternOfCRM pattern = new PatternOfCRM(crm, "yyyy-MM-dd'T'HH:mm:ss+hh:mm", 86400000);
+			PatternOfCRM pattern = new PatternOfCRM(crm, data.getDateFormat(), data.getMlSecPerDay());
 			System.out.println("Life Time: " + pattern.getLifeTimeEVandSD());
 			double[] modeLT = pattern.getModeOfLifeTime();
 			System.out.println("Mode of Life Time:");

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd ">
+ 
+ <bean id="initialdata" class="eddfish.crmsuccesspattern.dao.InitialData">
+ <constructor-arg name="dateFormat" value="yyyy-MM-dd'T'HH:mm:ss+hh:mm"/>
+ <constructor-arg name="jsonURL" value="opportunities.json"/>
+ <constructor-arg name="mls" value="86400000"/>
+ </bean>
+
+  </beans>

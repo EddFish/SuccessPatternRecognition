@@ -1,5 +1,6 @@
 package eddfish.crmsuccesspattern.model;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -27,8 +28,8 @@ public class PatternOfCRM {
 		nOfWons = stateCounting(crm, "won");
 		this.df = new SimpleDateFormat(df);
 		this.mlSecByPeriod = period;
-		double[] ltArray = creatArrayOfLifeTime(crm, "won");
-		double[] ncArray = creatArrayOfCommunications(crm, "won");
+		double[] ltArray = createArrayOfLifeTime(crm, "won");
+		double[] ncArray = createArrayOfCommunications(crm, "won");
 		double[] densArray = createArrayOfDensityCommunications(ltArray, ncArray);
 		this.modeOfLifeTime = StatUtils.mode(ltArray);
 		this.modenCommunications = StatUtils.mode(ncArray);
@@ -72,7 +73,7 @@ public class PatternOfCRM {
 
 	}
 
-	private double[] creatArrayOfCommunications(ONDiGO[] crm, String state) {
+	private double[] createArrayOfCommunications(ONDiGO[] crm, String state) {
 		double[] res = new double[nOfWons];
 		int k = 0;
 		for (int i = 0; i < crm.length; i++) {
@@ -85,7 +86,7 @@ public class PatternOfCRM {
 		return res;
 	}
 
-	private double[] creatArrayOfLifeTime(ONDiGO[] crm, String state) throws ParseException {
+	private double[] createArrayOfLifeTime(ONDiGO[] crm, String state) throws ParseException {
 		double[] res = new double[nOfWons];
 		int k = 0;
 		for (int i = 0; i < crm.length; i++) {
@@ -110,14 +111,14 @@ public class PatternOfCRM {
 		double[] res = new double[nOfWons];
 		for (int i = 0; i < res.length; i++) {
 			res[i] = ncArray[i] / ltArray[i];
-			res[i] = Precision.round(res[i], 2);
+			res[i] = Precision.round(res[i], 2, BigDecimal.ROUND_HALF_UP);
 		}
 		return res;
 	}
 
 	private double getTimeInterval(long begin, long end) {
 		double res = ((double) (end - begin)) / mlSecByPeriod;
-		res = Precision.round(res, 2);
+		res = Precision.round(res, 2, BigDecimal.ROUND_HALF_UP);
 		return res;
 	}
 
